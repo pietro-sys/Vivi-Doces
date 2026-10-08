@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vivi Doces Gourmet | Catálogo Corporativo B2B</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f9f9f9; color: #333; margin: 0; padding: 20px; }
+        header { text-align: center; background: #5a2e18; color: white; padding: 30px; border-radius: 8px; margin-bottom: 30px; }
+        h1 { margin: 0; font-size: 28px; }
+        p.subtitle { color: #f0d5b7; font-size: 16px; margin-top: 10px; }
+        .container { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-top: 4px solid #8b4513; }
+        .card h3 { margin-top: 0; color: #5a2e18; }
+        .badge { display: inline-block; background: #e8d7c1; color: #5a2e18; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-bottom: 10px; }
+        .price { font-size: 20px; color: #b85d19; font-weight: bold; margin: 15px 0 5px 0; }
+        .min-qty { font-size: 13px; color: #666; }
+        .btn-admin { display: block; text-align: center; margin: 30px auto; width: 200px; background: #333; color: white; padding: 10px; text-decoration: none; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Vivi Doces Gourmet</h1>
+        <p class="subtitle">Portfólio Exclusivo para Empresas, Eventos e Lotes Corporativos</p>
+    </header>
+
+    <div class="container">
+        {% for produto in produtos %}
+        <div class="card">
+            <span class="badge">{{ produto.categoria }}</span>
+            <h3>{{ produto.nome }}</h3>
+            <p>{{ produto.descricao }}</p>
+            <p class="min-qty"><strong>Pedido Mínimo:</strong> {{ produto.quantidade_minima }} unidade(s)</p>
+            <div class="price">R$ {{ "%.2f"|format(produto.preco_unitario) }}</div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <a href="/admin" class="btn-admin">Aceder ao Painel Interno</a>
+
+</body>
+</html>

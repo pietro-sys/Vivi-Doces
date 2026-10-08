@@ -1,7 +1,27 @@
 from flask import Flask, render_template
 import sqlite3
+import os
 
 app = Flask(__name__)
+
+# Função para garantir que a base de dados é recriada com a estrutura mais recente
+def init_db():
+    if os.path.exists('database.sql'):
+        conn = sqlite3.connect('database.db')
+        # Apaga as tabelas antigas para garantir que entram com a nova estrutura e colunas
+        conn.executescript("""
+            DROP TABLE IF EXISTS vendas;
+            DROP TABLE IF EXISTS produtos;
+            DROP TABLE IF EXISTS clientes;
+        """)
+        # Lê e executa o script atualizado do database.sql
+        with open('database.sql', 'r', encoding='utf-8') as f:
+            conn.executescript(f.read())
+        conn.commit()
+        conn.close()
+
+# Executa a inicialização ao iniciar a aplicação
+init_db()
 
 # Função auxiliar para conectar no banco e facilitar a leitura das colunas
 def get_db_connection():
@@ -17,7 +37,7 @@ def index():
     conn.close()
     return render_template('index.html', produtos=produtos)
 
-# Rota 2: Painel Administrativo (Controle interno para gerenciar clientes e vendas)
+# Rota 2: Painel Administrativo (Controle interno)
 @app.route('/admin')
 def admin():
     conn = get_db_connection()
