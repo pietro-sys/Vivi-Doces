@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel Administrativo | Vivi Doces Gourmet</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px; color: #333; }
+        .container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        h2 { color: #5a2e18; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        h3 { color: #8b4513; margin-top: 30px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 14px; }
+        th { background: #5a2e18; color: white; }
+        .back-link { display: inline-block; margin-bottom: 20px; color: #5a2e18; text-decoration: none; font-weight: bold; }
+        form { background: #fdfbf7; padding: 15px; border-radius: 6px; border: 1px solid #e8d7c1; margin-bottom: 25px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        form input, form select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+        form button { grid-column: span 2; background: #5a2e18; color: white; border: none; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        form button:hover { background: #402011; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <a href="/" class="back-link">&larr; Voltar ao Portfólio B2B</a>
+        <h2>Painel Interno de Controlo</h2>
+
+        <!-- Secção de Clientes -->
+        <h3>Registar Novo Cliente Corporativo</h3>
+        <form action="/adicionar_cliente" method="POST">
+            <input type="text" name="empresa" placeholder="Nome da Empresa" required>
+            <input type="text" name="cnpj" placeholder="CNPJ" required>
+            <input type="text" name="contato" placeholder="Nome do Contacto" required>
+            <input type="text" name="telefone" placeholder="Telefone / WhatsApp" required>
+            <button type="submit">Guardar Cliente</button>
+        </form>
+
+        <h3>Clientes Corporativos Registados</h3>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Empresa</th>
+                <th>CNPJ</th>
+                <th>Contacto</th>
+                <th>Telefone</th>
+            </tr>
+            {% for cliente in clientes %}
+            <tr>
+                <td>{{ cliente.id }}</td>
+                <td>{{ cliente.empresa }}</td>
+                <td>{{ cliente.cnpj }}</td>
+                <td>{{ cliente.contato }}</td>
+                <td>{{ cliente.telefone }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5">Ainda não existem clientes registados.</td></tr>
+            {% endfor %}
+        </table>
+
+        <!-- Secção de Vendas -->
+        <h3>Registar Novo Orçamento / Venda</h3>
+        <form action="/adicionar_venda" method="POST">
+            <input type="number" name="cliente_id" placeholder="ID do Cliente" required>
+            <input type="text" name="valor_total" placeholder="Valor Total (Ex: 350.00)" required>
+            <select name="status" style="grid-column: span 2;" required>
+                <option value="">Selecione o Status</option>
+                <option value="Orçamento Enviado">Orçamento Enviado</option>
+                <option value="Aprovado">Aprovado</option>
+                <option value="Em Produção">Em Produção</option>
+                <option value="Concluído">Concluído</option>
+            </select>
+            <button type="submit">Guardar Venda</button>
+        </form>
+
+        <h3>Histórico de Vendas e Orçamentos</h3>
+        <table>
+            <tr>
+                <th>ID Venda</th>
+                <th>ID Cliente</th>
+                <th>Valor Total</th>
+                <th>Status</th>
+            </tr>
+            {% for venda in vendas %}
+            <tr>
+                <td>{{ venda.id }}</td>
+                <td>{{ venda.cliente_id }}</td>
+                <td>R$ {{ venda.valor_total }}</td>
+                <td>{{ venda.status }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4">Ainda não existem vendas registadas.</td></tr>
+            {% endfor %}
+        </table>
+    </div>
+
+</body>
+</html>
