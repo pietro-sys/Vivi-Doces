@@ -10,12 +10,15 @@
         h1 { margin: 0; font-size: 28px; }
         p.subtitle { color: #f0d5b7; font-size: 16px; margin-top: 10px; }
         .container { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        .card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-top: 4px solid #8b4513; }
+        .card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-top: 4px solid #8b4513; display: flex; flex-direction: column; justify-content: space-between; }
         .card h3 { margin-top: 0; color: #5a2e18; }
         .badge { display: inline-block; background: #e8d7c1; color: #5a2e18; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-bottom: 10px; }
         .price { font-size: 20px; color: #b85d19; font-weight: bold; margin: 15px 0 5px 0; }
-        .min-qty { font-size: 13px; color: #666; }
-        .btn-admin { display: block; text-align: center; margin: 30px auto; width: 200px; background: #333; color: white; padding: 10px; text-decoration: none; border-radius: 5px; }
+        .min-qty { font-size: 13px; color: #666; margin-bottom: 15px; }
+        .btn-whatsapp { display: block; text-align: center; background: #25d366; color: white; padding: 10px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 14px; transition: background 0.3s; }
+        .btn-whatsapp:hover { background: #1ebe5d; }
+        .footer-nav { text-align: center; margin-top: 40px; }
+        .btn-admin { display: inline-block; background: #333; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -28,16 +31,25 @@
     <div class="container">
         {% for produto in produtos %}
         <div class="card">
-            <span class="badge">{{ produto.categoria }}</span>
-            <h3>{{ produto.nome }}</h3>
-            <p>{{ produto.descricao }}</p>
-            <p class="min-qty"><strong>Pedido Mínimo:</strong> {{ produto.quantidade_minima }} unidade(s)</p>
-            <div class="price">R$ {{ "%.2f"|format(produto.preco_unitario) }}</div>
+            <div>
+                <span class="badge">{{ produto.categoria }}</span>
+                <h3>{{ produto.nome }}</h3>
+                <p>{{ produto.descricao }}</p>
+                <p class="min-qty"><strong>Pedido Mínimo:</strong> {{ produto.quantidade_minima }} unidade(s)</p>
+                <div class="price">R$ {{ "%.2f"|format(produto.preco_unitario) }}</div>
+            </div>
+            <!-- Botão com mensagem automática para o WhatsApp -->
+            <a href="https://wa.me/5511983340797?text=Olá!%20Gostaria%20de%20solicitar%20um%20orçamento%20corporativo%20para%20o%20produto:%20{{ produto.nome }}%20(Pedido%20mínimo:%20{{ produto.quantidade_minima }}%20unidades)." 
+               target="_blank" class="btn-whatsapp">
+               Solicitar Orçamento via WhatsApp
+            </a>
         </div>
         {% endfor %}
     </div>
 
-    <a href="/admin" class="btn-admin">Aceder ao Painel Interno</a>
+    <div class="footer-nav">
+        <a href="/admin" class="btn-admin">Aceder ao Painel Interno</a>
+    </div>
 
 </body>
 </html>
