@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Entrar · Painel {{ NEGOCIO.nome }}</title>
+  <link rel="icon" href="{{ url_for('static', filename='img/favicon.svg') }}" type="image/svg+xml">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body class="admin admin--login">
+  <main class="a-login">
+    <h1>Vivi Doces <span>Painel</span></h1>
+    {% with mensagens = get_flashed_messages(with_categories=true) %}
+      {% for categoria, texto in mensagens %}
+      <p class="a-aviso a-aviso--erro" role="alert">{{ texto }}</p>
+      {% endfor %}
+    {% endwith %}
+    {% if not configurada %}
+    <p class="a-aviso a-aviso--erro">A senha do painel ainda não foi definida. Crie o arquivo <code>.env</code>
+      com a linha <code>ADMIN_PASSWORD=sua-senha</code> e reinicie o servidor (veja o README).</p>
+    {% endif %}
+    <form method="post" class="a-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>Senha
+        <input type="password" name="senha" autocomplete="current-password" required autofocus>
+      </label>
+      <button class="a-btn a-btn--primario a-btn--grande" type="submit">Entrar</button>
+    </form>
+    <p class="a-login__voltar"><a href="{{ url_for('index') }}">← Voltar ao site</a></p>
+  </main>
+</body>
+</html>
