@@ -1,0 +1,45 @@
+{% extends "admin/layout.html" %}
+{% block titulo %}Pedidos{% endblock %}
+{% block conteudo %}
+<div class="a-titulo">
+  <h1>Orçamentos e pedidos</h1>
+  <a class="a-btn a-btn--primario" href="{{ url_for('pedido') }}">+ Novo orçamento</a>
+</div>
+
+<form class="a-busca" method="get" action="{{ url_for('pedidos') }}">
+  {% if status_atual %}<input type="hidden" name="status" value="{{ status_atual }}">{% endif %}
+  <input type="search" name="q" value="{{ busca }}" placeholder="Buscar por empresa" aria-label="Buscar por empresa">
+  <button class="a-btn" type="submit">Buscar</button>
+</form>
+
+<div class="a-filtros" role="group" aria-label="Filtrar por status">
+  <a class="a-filtro {{ 'ativo' if not status_atual }}" href="{{ url_for('pedidos', q=busca or None) }}">Todos</a>
+  {% for s in STATUS %}
+  <a class="a-filtro {{ 'ativo' if status_atual == s }}" href="{{ url_for('pedidos', status=s, q=busca or None) }}">{{ s }}</a>
+  {% endfor %}
+</div>
+
+{% if lista %}
+<div class="a-tabela-wrap">
+  <table class="a-tabela">
+    <thead><tr><th>Nº</th><th>Cliente</th><th>Criado em</th><th>Entrega</th><th>Valor</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    {% for v in lista %}
+      <tr>
+        <td data-rotulo="Nº">{{ v.id }}</td>
+        <td data-rotulo="Cliente">{{ v.empresa or '—' }}</td>
+        <td data-rotulo="Criado em">{{ v.data_venda|data_br }}</td>
+        <td data-rotulo="Entrega">{{ v.data_entrega|data_br or '—' }}
+          {% if v.data_entrega and v.data_entrega < hoje_iso and v.status in ('Aprovado', 'Em produção') %}<span class="a-selo a-selo--atraso">atrasada</span>{% endif %}</td>
+        <td data-rotulo="Valor">{{ v.valor_total|brl }}</td>
+        <td data-rotulo="Status"><span class="a-status a-status--{{ STATUS_CLASSE[v.status] }}">{{ v.status }}</span></td>
+        <td><a href="{{ url_for('pedido', venda_id=v.id) }}">Abrir</a></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p class="a-vazio">Nenhum pedido encontrado{% if status_atual or busca %} com esse filtro{% endif %}.</p>
+{% endif %}
+{% endblock %}
