@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block titulo %}{{ titulo }} · {{ NEGOCIO.nome }}{% endblock %}
+{% block descricao %}{{ mensagem }}{% endblock %}
+{% block corpo %}
+<main class="erro">
+  <p class="erro__codigo">{{ codigo }}</p>
+  <h1>{{ titulo }}</h1>
+  <p>{{ mensagem }}</p>
+  <p><a class="btn btn--primario" href="{{ url_for('index') }}">Voltar ao início</a></p>
+</main>
+{% endblock %}
