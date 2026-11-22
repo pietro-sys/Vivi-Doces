@@ -1,0 +1,60 @@
+{% extends "admin/layout.html" %}
+{% block titulo %}{{ produto.nome if produto else 'Novo produto' }}{% endblock %}
+{% block conteudo %}
+<div class="a-titulo"><h1>{{ produto.nome if produto else 'Novo produto' }}</h1></div>
+
+{% if erros %}
+<div class="a-aviso a-aviso--erro" role="alert">
+  <strong>Confira antes de salvar:</strong>
+  <ul>{% for e in erros %}<li>{{ e }}</li>{% endfor %}</ul>
+</div>
+{% endif %}
+
+<form method="post" class="a-form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <section class="a-bloco">
+    <div class="a-campos">
+      <label class="a-campo-largo">Nome
+        <input type="text" name="nome" value="{{ dados.nome }}" required maxlength="120">
+      </label>
+      <label>Categoria
+        <input type="text" name="categoria" value="{{ dados.categoria }}" list="categorias" maxlength="60">
+        <datalist id="categorias">{% for c in categorias %}<option value="{{ c }}">{% endfor %}</datalist>
+      </label>
+      <label>Vendido por
+        <select name="unidade_venda">
+          {% for chave, nomes in UNIDADES.items() %}
+          <option value="{{ chave }}" {% if dados.unidade_venda == chave %}selected{% endif %}>{{ nomes[0] }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Pedido mínimo
+        <input type="text" inputmode="numeric" name="quantidade_minima" value="{{ dados.quantidade_minima }}" maxlength="8">
+      </label>
+      <label>Preço (R$)
+        <input type="text" inputmode="decimal" name="preco_unitario" value="{{ dados.preco_unitario }}" maxlength="14" placeholder="0,00">
+      </label>
+      <label><span>Custo de produção (R$) <small>(só você vê)</small></span>
+        <input type="text" inputmode="decimal" name="custo_producao" value="{{ dados.custo_producao }}" maxlength="14" placeholder="0,00">
+      </label>
+    </div>
+    <label class="a-campo-largo">
+      <span class="a-rotulo">Descrição (aparece no site)</span>
+      <textarea name="descricao" rows="3" maxlength="500">{{ dados.descricao }}</textarea>
+    </label>
+    <label class="a-campo-largo">
+      <span class="a-rotulo">Foto (opcional)</span>
+      <input type="text" name="imagem" value="{{ dados.imagem }}" maxlength="120" placeholder="ex.: brownie.jpg">
+      <small>Copie a foto para a pasta <code>static/img/produtos/</code> e escreva aqui só o nome do arquivo.</small>
+    </label>
+    <label class="a-marcar">
+      <input type="checkbox" name="ativo" value="1" {% if dados.ativo %}checked{% endif %}>
+      Mostrar este produto no site
+    </label>
+  </section>
+  <div class="a-acoes">
+    <button class="a-btn a-btn--primario a-btn--grande" type="submit">Salvar</button>
+    <a class="a-btn a-btn--discreto" href="{{ url_for('produtos') }}">Cancelar</a>
+  </div>
+</form>
+{% endblock %}
