@@ -1,55 +1,256 @@
-<!DOCTYPE html>
-<html lang="pt">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vivi Doces Gourmet | Catálogo Corporativo B2B</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f9f9f9; color: #333; margin: 0; padding: 20px; }
-        header { text-align: center; background: #5a2e18; color: white; padding: 30px; border-radius: 8px; margin-bottom: 30px; }
-        h1 { margin: 0; font-size: 28px; }
-        p.subtitle { color: #f0d5b7; font-size: 16px; margin-top: 10px; }
-        .container { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        .card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-top: 4px solid #8b4513; display: flex; flex-direction: column; justify-content: space-between; }
-        .card h3 { margin-top: 0; color: #5a2e18; }
-        .badge { display: inline-block; background: #e8d7c1; color: #5a2e18; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-bottom: 10px; }
-        .price { font-size: 20px; color: #b85d19; font-weight: bold; margin: 15px 0 5px 0; }
-        .min-qty { font-size: 13px; color: #666; margin-bottom: 15px; }
-        .btn-whatsapp { display: block; text-align: center; background: #25d366; color: white; padding: 10px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 14px; transition: background 0.3s; }
-        .btn-whatsapp:hover { background: #1ebe5d; }
-        .footer-nav { text-align: center; margin-top: 40px; }
-        .btn-admin { display: inline-block; background: #333; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-size: 14px; }
-    </style>
-</head>
-<body>
+{% extends "base.html" %}
+{% set wa_ola = 'Olá! Gostaria de saber mais sobre os doces para empresas.' %}
+{% set prazo = NEGOCIO.prazo_minimo_dias %}
 
-    <header>
-        <h1>Vivi Doces Gourmet</h1>
-        <p class="subtitle">Portfólio Exclusivo para Empresas, Eventos e Lotes Corporativos</p>
+{% block titulo %}{{ NEGOCIO.nome }} · Doces artesanais para empresas{% endblock %}
+{% block descricao %}Doces artesanais para empresas, a partir de {{ NEGOCIO.pedido_minimo }} unidades: brownies, cupcakes, bolos de pote, kits e centos, com a logomarca da sua empresa. Monte a lista e peça o orçamento pelo WhatsApp.{% endblock %}
+
+{% block corpo %}
+<a class="pular" href="#catalogo">Pular para o catálogo</a>
+
+<header class="topo">
+  <div class="container topo__linha">
+    <a class="marca" href="#inicio" aria-label="{{ NEGOCIO.nome }} — início">
+      <span class="marca__nome">Vivi Doces</span><span class="marca__sub">Gourmet</span>
+    </a>
+    <nav class="menu" aria-label="Principal">
+      <a href="#catalogo">Catálogo</a>
+      <a href="#como-funciona">Como funciona</a>
+      <a href="#personalizacao">Personalização</a>
+      <a href="#duvidas">Dúvidas</a>
+    </nav>
+    <button class="btn btn--primario btn--pequeno" type="button" data-abrir-orcamento>
+      Meu orçamento <span class="contador" data-contador aria-live="polite">0</span>
+    </button>
+  </div>
+</header>
+
+<main>
+  <section class="hero" id="inicio">
+    <div class="container">
+      <p class="selo">Para empresas · a partir de {{ NEGOCIO.pedido_minimo }} unidades</p>
+      <h1>Doces artesanais para dar sabor aos momentos da sua empresa</h1>
+      <p class="hero__texto">
+        Brindes, reuniões, confraternizações e datas especiais, com etiqueta personalizada
+        com a logomarca da sua empresa. Monte a lista e receba o orçamento no WhatsApp.
+      </p>
+      <div class="hero__acoes">
+        <a class="btn btn--claro" href="#catalogo">Ver catálogo</a>
+        <a class="btn btn--contorno" href="https://wa.me/{{ NEGOCIO.whatsapp }}?text={{ wa_ola|urlencode }}"
+           target="_blank" rel="noopener">Falar no WhatsApp</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="destaques" aria-label="Destaques">
+    <div class="container destaques__grade">
+      <div><strong>{{ NEGOCIO.pedido_minimo }}+</strong><span>unidades por produto no pedido mínimo</span></div>
+      <div><strong>{{ prazo }} dias</strong><span>de antecedência recomendada</span></div>
+      <div><strong>Sua marca</strong><span>etiqueta com a logomarca em vários itens</span></div>
+      <div><strong>WhatsApp</strong><span>orçamento direto, sem cadastro</span></div>
+    </div>
+  </section>
+
+  <section class="secao" id="catalogo">
+    <div class="container">
+      <header class="secao__cabeca">
+        <h2>Catálogo para empresas</h2>
+        <p>Escolha os produtos e as quantidades, monte sua lista e envie para nós pelo WhatsApp.
+           Os valores abaixo são de tabela; o orçamento final é confirmado por mensagem.</p>
+      </header>
+
+      {% if categorias|length > 1 %}
+      <div class="filtros" role="group" aria-label="Filtrar por categoria" data-filtros>
+        <button class="filtro is-ativo" type="button" data-categoria="todas" aria-pressed="true">Todos</button>
+        {% for c in categorias %}
+        <button class="filtro" type="button" data-categoria="{{ c.indice }}" aria-pressed="false">{{ c.nome }}</button>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% for c in categorias %}
+      <section class="categoria" data-secao="{{ c.indice }}" aria-labelledby="cat-{{ c.indice }}">
+        <h3 id="cat-{{ c.indice }}">{{ c.nome }}</h3>
+        {% if c.texto %}<p class="categoria__texto">{{ c.texto }}</p>{% endif %}
+        <div class="grade">
+          {% for p in c.produtos %}
+          <article class="produto" data-produto data-id="{{ p.id }}" data-nome="{{ p.nome }}"
+                   data-preco="{{ p.preco_unitario }}" data-minimo="{{ p.quantidade_minima }}"
+                   data-unidade="{{ p.unidade_venda }}">
+            <div class="produto__midia cat-{{ c.indice % 3 }}">
+              {% if p.imagem_ok %}
+              <img src="{{ url_for('static', filename='img/produtos/' ~ p.imagem) }}" alt="{{ p.nome }}" loading="lazy">
+              {% else %}
+              <span class="produto__monograma" aria-hidden="true">{{ p.nome[0] }}</span>
+              {% endif %}
+            </div>
+            <div class="produto__corpo">
+              <h4 class="produto__nome">{{ p.nome }}</h4>
+              {% if p.descricao %}<p class="produto__desc">{{ p.descricao }}</p>{% endif %}
+              <p class="produto__minimo">Pedido mínimo: {{ p.quantidade_minima|qtd_un(p.unidade_venda) }}</p>
+              <p class="produto__preco"><strong>{{ p.preco_unitario|brl }}</strong>
+                <span>/ {{ UNIDADES[p.unidade_venda][0] }}</span></p>
+              <div class="produto__acao">
+                <div class="quantidade">
+                  <button type="button" data-menos aria-label="Diminuir a quantidade de {{ p.nome }}">−</button>
+                  <input type="number" inputmode="numeric" min="{{ p.quantidade_minima }}" step="1"
+                         value="{{ p.quantidade_minima }}" data-quantidade
+                         aria-label="Quantidade de {{ p.nome }}">
+                  <button type="button" data-mais aria-label="Aumentar a quantidade de {{ p.nome }}">+</button>
+                </div>
+                <button class="btn btn--primario" type="button" data-adicionar>Adicionar</button>
+              </div>
+              <p class="produto__estado" data-estado hidden></p>
+            </div>
+          </article>
+          {% endfor %}
+        </div>
+      </section>
+      {% else %}
+      <p class="vazio">O catálogo está sendo atualizado. Chame a gente no WhatsApp que enviamos as opções.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="secao secao--creme" id="como-funciona">
+    <div class="container">
+      <header class="secao__cabeca"><h2>Como funciona</h2></header>
+      <ol class="passos">
+        <li><span class="passo__num">1</span><h3>Monte sua lista</h3>
+          <p>Escolha os produtos e as quantidades. Não precisa de cadastro.</p></li>
+        <li><span class="passo__num">2</span><h3>Receba o orçamento</h3>
+          <p>Respondemos pelo WhatsApp com valores, prazo e condições para o seu pedido.</p></li>
+        <li><span class="passo__num">3</span><h3>Aprove e envie sua logo</h3>
+          <p>Aprovado o orçamento, combinamos os detalhes e a arte da etiqueta, se houver personalização.</p></li>
+        <li><span class="passo__num">4</span><h3>Produção e entrega</h3>
+          <p>Produzimos tudo de forma artesanal e combinamos a entrega com você.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="secao" id="personalizacao">
+    <div class="container personalizacao">
+      <div>
+        <h2>Sua marca em cada doce</h2>
+        <p>Vários itens do catálogo levam etiqueta com a logomarca da sua empresa, ótimo para
+           brindes de clientes, ações de endomarketing e eventos corporativos.
+           Procure por <em>personalizado</em> na descrição dos produtos.</p>
+        <p>Para personalizar, é só avisar no pedido de orçamento e enviar a logomarca da empresa
+           (de preferência em boa qualidade). A arte é combinada com você pelo WhatsApp.</p>
+      </div>
+      <div class="personalizacao__cartao" aria-hidden="true">
+        <span class="personalizacao__marca">SUA LOGO</span>
+        <span class="personalizacao__legenda">na etiqueta do doce</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="secao secao--creme" id="duvidas">
+    <div class="container container--estreito">
+      <header class="secao__cabeca"><h2>Dúvidas frequentes</h2></header>
+      <div class="faq">
+        <details><summary>Qual é o pedido mínimo?</summary>
+          <p>Aparece em cada produto. Nos doces individuais é de {{ NEGOCIO.pedido_minimo }} unidades;
+             centos e kits podem ser pedidos a partir de 1.</p></details>
+        <details><summary>Com quanta antecedência devo pedir?</summary>
+          <p>Recomendamos {{ prazo }} dias de antecedência. Precisa para antes? Chame a gente no
+             WhatsApp e confirmamos a disponibilidade.</p></details>
+        <details><summary>Como funciona o orçamento?</summary>
+          <p>Você monta a lista aqui no site e envia pelo WhatsApp. Respondemos com valores, prazo e
+             condições de entrega e pagamento.</p></details>
+        <details><summary>Posso colocar a logomarca da minha empresa?</summary>
+          <p>Sim, em vários itens do catálogo. Avise no pedido de orçamento e envie a logomarca.</p></details>
+        <details><summary>Como são a entrega e o pagamento?</summary>
+          <p>Combinamos a entrega e a forma de pagamento no orçamento, de acordo com o seu pedido.</p></details>
+        <details><summary>Alguém da equipe tem alergia ou restrição alimentar?</summary>
+          <p>Conte para nós no campo de observações do orçamento. Nossos doces são artesanais e podem
+             conter leite, ovos, glúten e outros alergênicos, então avaliamos cada caso.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="chamada">
+    <div class="container">
+      <h2>Vamos adoçar o próximo evento da sua empresa?</h2>
+      <p>Monte sua lista e peça o orçamento. Respondemos pelo WhatsApp.</p>
+      <p><a class="btn btn--claro" href="#catalogo">Montar minha lista</a></p>
+    </div>
+  </section>
+</main>
+
+<footer class="rodape">
+  <div class="container rodape__grade">
+    <div>
+      <p class="rodape__marca">{{ NEGOCIO.nome }}</p>
+      <p>Doces artesanais para empresas.</p>
+      {% if NEGOCIO.cidade %}<p>{{ NEGOCIO.cidade }}</p>{% endif %}
+    </div>
+    <div>
+      <p class="rodape__titulo">Contato</p>
+      <p><a href="https://wa.me/{{ NEGOCIO.whatsapp }}" target="_blank" rel="noopener">WhatsApp</a></p>
+      {% if NEGOCIO.instagram %}<p><a href="https://instagram.com/{{ NEGOCIO.instagram }}" target="_blank" rel="noopener">Instagram @{{ NEGOCIO.instagram }}</a></p>{% endif %}
+      {% if NEGOCIO.email %}<p><a href="mailto:{{ NEGOCIO.email }}">{{ NEGOCIO.email }}</a></p>{% endif %}
+    </div>
+    {% if NEGOCIO.razao_social or NEGOCIO.cnpj %}
+    <div>
+      <p class="rodape__titulo">Empresa</p>
+      {% if NEGOCIO.razao_social %}<p>{{ NEGOCIO.razao_social }}</p>{% endif %}
+      {% if NEGOCIO.cnpj %}<p>CNPJ {{ NEGOCIO.cnpj }}</p>{% endif %}
+    </div>
+    {% endif %}
+  </div>
+  <p class="rodape__copy">© {{ ano }} {{ NEGOCIO.nome }}</p>
+</footer>
+
+<div class="barra" data-barra hidden>
+  <div class="container barra__linha">
+    <p class="barra__resumo"><strong data-barra-itens>0 itens</strong> · <span data-barra-total>R$ 0,00</span>
+      <small>estimativa</small></p>
+    <button class="btn btn--primario" type="button" data-abrir-orcamento>Revisar e enviar</button>
+  </div>
+</div>
+
+<dialog class="orcamento" id="orcamento" aria-labelledby="orc-titulo"
+        data-prazo="{{ prazo }}" data-whatsapp="{{ NEGOCIO.whatsapp }}" data-negocio="{{ NEGOCIO.nome }}">
+  <form class="orcamento__form" data-form-orcamento>
+    <header class="orcamento__cabeca">
+      <h2 id="orc-titulo">Seu orçamento</h2>
+      <button class="fechar" type="button" data-fechar aria-label="Fechar">×</button>
     </header>
 
-    <div class="container">
-        {% for produto in produtos %}
-        <div class="card">
-            <div>
-                <span class="badge">{{ produto.categoria }}</span>
-                <h3>{{ produto.nome }}</h3>
-                <p>{{ produto.descricao }}</p>
-                <p class="min-qty"><strong>Pedido Mínimo:</strong> {{ produto.quantidade_minima }} unidade(s)</p>
-                <div class="price">R$ {{ "%.2f"|format(produto.preco_unitario) }}</div>
-            </div>
-            <!-- Botão com mensagem automática para o WhatsApp -->
-            <a href="https://wa.me/5511983340797?text=Olá!%20Gostaria%20de%20solicitar%20um%20orçamento%20corporativo%20para%20o%20produto:%20{{ produto.nome }}%20(Pedido%20mínimo:%20{{ produto.quantidade_minima }}%20unidades)." 
-               target="_blank" class="btn-whatsapp">
-               Solicitar Orçamento via WhatsApp
-            </a>
-        </div>
-        {% endfor %}
+    <p class="orcamento__vazio" data-vazio>Sua lista está vazia. Adicione produtos do catálogo.</p>
+    <ul class="orcamento__lista" data-lista></ul>
+
+    <p class="orcamento__total" data-total-linha hidden>Total estimado <strong data-total>R$ 0,00</strong></p>
+    <p class="orcamento__nota">Valores de tabela. O orçamento final é confirmado pelo WhatsApp.</p>
+
+    <div class="campos">
+      <label>Empresa
+        <input type="text" name="empresa" autocomplete="organization" required maxlength="80" data-campo="empresa">
+      </label>
+      <label>Seu nome
+        <input type="text" name="contato" autocomplete="name" required maxlength="80" data-campo="contato">
+      </label>
+      <label><span>Data desejada de entrega <span class="opcional">(opcional)</span></span>
+        <input type="date" name="data" data-campo="data" data-data>
+      </label>
+      <p class="aviso" data-aviso-prazo hidden>
+        Para menos de {{ prazo }} dias de antecedência, confirmamos a disponibilidade pelo WhatsApp.
+      </p>
+      <label><span>Observações <span class="opcional">(opcional)</span></span>
+        <textarea name="obs" rows="3" maxlength="400" data-campo="obs"
+                  placeholder="Ex.: logomarca nos doces, alergias, endereço de entrega…"></textarea>
+      </label>
     </div>
 
-    <div class="footer-nav">
-        <a href="/admin" class="btn-admin">Aceder ao Painel Interno</a>
+    <div class="orcamento__acoes">
+      <button class="btn btn--whatsapp" type="submit" data-enviar>Enviar pelo WhatsApp</button>
+      <button class="link-botao" type="button" data-limpar>Limpar lista</button>
     </div>
+  </form>
+</dialog>
+{% endblock %}
 
-</body>
-</html>
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/orcamento.js') }}" defer></script>
+{% endblock %}
