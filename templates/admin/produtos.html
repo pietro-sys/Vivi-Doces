@@ -1,0 +1,36 @@
+{% extends "admin/layout.html" %}
+{% block titulo %}Produtos{% endblock %}
+{% block conteudo %}
+<div class="a-titulo">
+  <h1>Produtos e preços</h1>
+  <a class="a-btn a-btn--primario" href="{{ url_for('produto') }}">+ Novo produto</a>
+</div>
+<p class="a-dica">O que aparece no site são os produtos <strong>ativos</strong>. Custo e margem só você vê aqui no painel.
+  Mudar o preço não altera orçamentos que já foram feitos.</p>
+
+<div class="a-tabela-wrap">
+  <table class="a-tabela">
+    <thead><tr><th>Produto</th><th>Vendido por</th><th>Mínimo</th><th>Preço</th><th>Custo</th><th>Margem</th><th>No site</th><th></th></tr></thead>
+    <tbody>
+    {% for p in lista %}
+      <tr class="{{ '' if p.ativo else 'a-linha-inativa' }}">
+        <td data-rotulo="Produto"><a href="{{ url_for('produto', produto_id=p.id) }}"><strong>{{ p.nome }}</strong></a><br><small>{{ p.categoria or 'Sem categoria' }}</small></td>
+        <td data-rotulo="Vendido por">{{ UNIDADES[p.unidade_venda][0] }}</td>
+        <td data-rotulo="Mínimo">{{ p.quantidade_minima }}</td>
+        <td data-rotulo="Preço">{{ p.preco_unitario|brl }}</td>
+        <td data-rotulo="Custo">{{ p.custo_producao|brl }}</td>
+        <td data-rotulo="Margem">{% if p.preco_unitario %}{{ (((p.preco_unitario - p.custo_producao) / p.preco_unitario) * 100)|round|int }}%{% else %}—{% endif %}</td>
+        <td data-rotulo="No site">
+          <form method="post" action="{{ url_for('produto_alternar', produto_id=p.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="a-btn a-btn--pequeno {{ 'a-btn--ligado' if p.ativo }}" type="submit"
+                    aria-label="{{ 'Esconder' if p.ativo else 'Mostrar' }} {{ p.nome }} no site">{{ 'Ativo' if p.ativo else 'Oculto' }}</button>
+          </form>
+        </td>
+        <td><a href="{{ url_for('produto', produto_id=p.id) }}">Editar</a></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
