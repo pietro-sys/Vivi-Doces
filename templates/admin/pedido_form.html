@@ -1,0 +1,129 @@
+{% extends "admin/layout.html" %}
+{% block titulo %}{% if venda %}Pedido nº {{ venda.id }}{% else %}Novo orçamento{% endif %}{% endblock %}
+
+{% macro linha(it) %}
+<div class="a-item" data-item>
+  <label class="a-item__produto"><span class="a-rotulo">Produto</span>
+    <select name="item_produto" data-produto>
+      <option value="">Item avulso (digitar)</option>
+      {% for cat, lista in produtos|groupby('categoria') %}
+      <optgroup label="{{ cat }}">
+        {% for p in lista %}
+        <option value="{{ p.id }}" data-op-nome="{{ p.nome }}" data-op-preco="{{ p.preco_unitario|num_br }}"
+                data-op-custo="{{ p.custo_producao|num_br }}" data-op-min="{{ p.quantidade_minima }}"
+                {% if it.produto_id|string == p.id|string %}selected{% endif %}>{{ p.nome }}{% if not p.ativo %} (oculto no site){% endif %}</option>
+        {% endfor %}
+      </optgroup>
+      {% endfor %}
+    </select>
+  </label>
+  <label class="a-item__desc"><span class="a-rotulo">Descrição</span>
+    <input type="text" name="item_descricao" value="{{ it.descricao }}" maxlength="160" data-desc>
+  </label>
+  <label class="a-item__qtd"><span class="a-rotulo">Qtd.</span>
+    <input type="text" inputmode="numeric" name="item_qtd" value="{{ it.quantidade }}" data-qtd>
+  </label>
+  <label class="a-item__preco"><span class="a-rotulo">Preço unit. (R$)</span>
+    <input type="text" inputmode="decimal" name="item_preco" value="{{ it.preco }}" data-preco>
+  </label>
+  <input type="hidden" name="item_custo" value="{{ it.custo }}" data-custo>
+  <div class="a-item__sub"><span class="a-rotulo">Subtotal</span><strong data-sub>R$ 0,00</strong></div>
+  <button type="button" class="a-item__remover" data-remover-item aria-label="Remover este item">×</button>
+</div>
+{% endmacro %}
+
+{% block conteudo %}
+<div class="a-titulo">
+  <h1>{% if venda %}Pedido nº {{ venda.id }}{% else %}Novo orçamento{% endif %}</h1>
+  {% if venda %}<span class="a-status a-status--{{ STATUS_CLASSE[venda.status] }}">{{ venda.status }}</span>{% endif %}
+</div>
+
+{% if erros %}
+<div class="a-aviso a-aviso--erro" role="alert">
+  <strong>Confira antes de salvar:</strong>
+  <ul>{% for e in erros %}<li>{{ e }}</li>{% endfor %}</ul>
+</div>
+{% endif %}
+
+<form method="post" class="a-form" data-form-pedido>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+  <section class="a-bloco">
+    <h2>Cliente e prazos</h2>
+    <div class="a-campos">
+      <label>Cliente
+        <select name="cliente_id" required>
+          <option value="">Escolha o cliente…</option>
+          {% for c in clientes %}
+          <option value="{{ c.id }}" {% if dados.cliente_id|string == c.id|string %}selected{% endif %}>{{ c.empresa }}</option>
+          {% endfor %}
+        </select>
+        <small><a href="{{ url_for('cliente') }}">+ Cadastrar novo cliente</a></small>
+      </label>
+      <label>Status
+        <select name="status">
+          {% for s in STATUS %}<option value="{{ s }}" {% if dados.status == s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>Data de entrega
+        <input type="date" name="data_entrega" value="{{ dados.data_entrega }}">
+      </label>
+      <label>Forma de pagamento
+        <input type="text" name="forma_pagamento" value="{{ dados.forma_pagamento }}" list="formas" maxlength="60">
+        <datalist id="formas">{% for f in FORMAS_PAGAMENTO %}<option value="{{ f }}">{% endfor %}</datalist>
+      </label>
+    </div>
+  </section>
+
+  <section class="a-bloco">
+    <h2>Itens</h2>
+    <p class="a-dica">Escolha o produto e o preço entra sozinho; pode mudar o preço para dar desconto.
+      Para algo fora do catálogo (frete, arte, item especial), deixe “Item avulso” e digite a descrição.</p>
+    <div class="a-itens" data-itens>
+      {% for it in itens %}{{ linha(it) }}{% else %}
+      {{ linha({'produto_id': '', 'descricao': '', 'quantidade': '', 'preco': '', 'custo': ''}) }}
+      {% endfor %}
+    </div>
+    <template id="linha-modelo">{{ linha({'produto_id': '', 'descricao': '', 'quantidade': '', 'preco': '', 'custo': ''}) }}</template>
+    <button type="button" class="a-btn" data-add-item>+ Adicionar item</button>
+
+    <dl class="a-totais">
+      <div><dt>Total</dt><dd data-total>R$ 0,00</dd></div>
+      <div><dt>Margem estimada <small>(só itens do catálogo)</small></dt><dd data-margem>—</dd></div>
+    </dl>
+  </section>
+
+  <section class="a-bloco">
+    <h2>Observações</h2>
+    <label class="a-campo-largo">
+      <span class="a-rotulo">Anotações internas e combinados com o cliente</span>
+      <textarea name="observacoes" rows="3" maxlength="2000">{{ dados.observacoes }}</textarea>
+    </label>
+  </section>
+
+  <div class="a-acoes">
+    <button class="a-btn a-btn--primario a-btn--grande" type="submit">Salvar</button>
+    <a class="a-btn a-btn--discreto" href="{{ url_for('pedidos') }}">Cancelar</a>
+  </div>
+</form>
+
+{% if texto %}
+<section class="a-bloco">
+  <h2>Enviar o orçamento ao cliente</h2>
+  <p class="a-dica">O texto abaixo vem do pedido salvo. Se você mudou algo agora, salve antes de enviar.</p>
+  <textarea class="a-texto-orc" id="texto-orcamento" rows="12" readonly>{{ texto }}</textarea>
+  <div class="a-botoes">
+    <a class="a-btn a-btn--whatsapp" href="{{ wa_link }}" target="_blank" rel="noopener">Abrir no WhatsApp</a>
+    <button class="a-btn" type="button" data-copiar="#texto-orcamento">Copiar texto</button>
+  </div>
+</section>
+{% endif %}
+
+{% if venda %}
+<form method="post" action="{{ url_for('pedido_excluir', venda_id=venda.id) }}" class="a-perigo"
+      data-confirmar="Excluir este pedido e todos os seus itens? Isso não pode ser desfeito.">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <button class="a-btn a-btn--perigo" type="submit">Excluir este pedido</button>
+</form>
+{% endif %}
+{% endblock %}
