@@ -1,0 +1,75 @@
+{% extends "admin/layout.html" %}
+{% block titulo %}Início{% endblock %}
+{% block conteudo %}
+<div class="a-titulo">
+  <h1>Início</h1>
+  <div class="a-botoes">
+    <a class="a-btn a-btn--primario" href="{{ url_for('pedido') }}">+ Novo orçamento</a>
+    <a class="a-btn" href="{{ url_for('cliente') }}">+ Novo cliente</a>
+  </div>
+</div>
+
+<div class="a-resumo">
+  <a class="a-cartao" href="{{ url_for('pedidos', status='Orçamento') }}">
+    <span>Orçamentos em aberto</span><strong>{{ abertos.n }}</strong><small>{{ abertos.total|brl }}</small>
+  </a>
+  <a class="a-cartao" href="{{ url_for('pedidos', status='Aprovado') }}">
+    <span>Aprovados / em produção</span><strong>{{ andamento.n }}</strong><small>{{ andamento.total|brl }}</small>
+  </a>
+  <a class="a-cartao" href="{{ url_for('pedidos', status='Entregue') }}">
+    <span>Entregues, falta receber</span><strong>{{ a_receber.n }}</strong><small>{{ a_receber.total|brl }}</small>
+  </a>
+</div>
+
+<section class="a-bloco">
+  <h2>Próximas entregas</h2>
+  {% if entregas %}
+  <div class="a-tabela-wrap">
+    <table class="a-tabela">
+      <thead><tr><th>Entrega</th><th>Cliente</th><th>Valor</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+      {% for v in entregas %}
+        <tr>
+          <td data-rotulo="Entrega">{{ v.data_entrega|data_br }}
+            {% if v.data_entrega < hoje_iso %}<span class="a-selo a-selo--atraso">atrasada</span>
+            {% elif v.data_entrega == hoje_iso %}<span class="a-selo a-selo--hoje">hoje</span>{% endif %}</td>
+          <td data-rotulo="Cliente">{{ v.empresa or '—' }}</td>
+          <td data-rotulo="Valor">{{ v.valor_total|brl }}</td>
+          <td data-rotulo="Status"><span class="a-status a-status--{{ STATUS_CLASSE[v.status] }}">{{ v.status }}</span></td>
+          <td><a href="{{ url_for('pedido', venda_id=v.id) }}">Abrir</a></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="a-vazio">Nenhuma entrega marcada. Pedidos aprovados com data de entrega aparecem aqui.</p>
+  {% endif %}
+</section>
+
+<section class="a-bloco">
+  <h2>Últimos pedidos</h2>
+  {% if recentes %}
+  <div class="a-tabela-wrap">
+    <table class="a-tabela">
+      <thead><tr><th>Nº</th><th>Data</th><th>Cliente</th><th>Valor</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+      {% for v in recentes %}
+        <tr>
+          <td data-rotulo="Nº">{{ v.id }}</td>
+          <td data-rotulo="Data">{{ v.data_venda|data_br }}</td>
+          <td data-rotulo="Cliente">{{ v.empresa or '—' }}</td>
+          <td data-rotulo="Valor">{{ v.valor_total|brl }}</td>
+          <td data-rotulo="Status"><span class="a-status a-status--{{ STATUS_CLASSE[v.status] }}">{{ v.status }}</span></td>
+          <td><a href="{{ url_for('pedido', venda_id=v.id) }}">Abrir</a></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p><a href="{{ url_for('pedidos') }}">Ver todos os pedidos →</a></p>
+  {% else %}
+  <p class="a-vazio">Ainda não há pedidos. Comece cadastrando um cliente e criando o primeiro orçamento.</p>
+  {% endif %}
+</section>
+{% endblock %}
