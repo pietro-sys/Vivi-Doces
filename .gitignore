@@ -1,0 +1,19 @@
+# Dados e segredos: nunca versionar
+.env
+instance/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Editor / sistema
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
