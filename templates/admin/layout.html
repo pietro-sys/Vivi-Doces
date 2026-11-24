@@ -1,37 +1,48 @@
-{% extends "admin/layout.html" %}
-{% block titulo %}Clientes{% endblock %}
-{% block conteudo %}
-<div class="a-titulo">
-  <h1>Clientes</h1>
-  <a class="a-btn a-btn--primario" href="{{ url_for('cliente') }}">+ Novo cliente</a>
-</div>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>{% block titulo %}Painel{% endblock %} · Painel {{ NEGOCIO.nome }}</title>
+  <link rel="icon" href="{{ url_for('static', filename='img/favicon.svg') }}" type="image/svg+xml">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body class="admin">
+  {% set ep = request.endpoint %}
+  <header class="a-topo">
+    <div class="a-container a-topo__linha">
+      <a class="a-marca" href="{{ url_for('painel') }}">Vivi Doces <span>Painel</span></a>
+      <nav class="a-menu" aria-label="Principal">
+        <a href="{{ url_for('painel') }}" {% if ep == 'painel' %}aria-current="page"{% endif %}>Início</a>
+        <a href="{{ url_for('pedidos') }}" {% if ep in ('pedidos', 'pedido') %}aria-current="page"{% endif %}>Pedidos</a>
+        <a href="{{ url_for('clientes') }}" {% if ep in ('clientes', 'cliente') %}aria-current="page"{% endif %}>Clientes</a>
+        <a href="{{ url_for('produtos') }}" {% if ep in ('produtos', 'produto') %}aria-current="page"{% endif %}>Produtos</a>
+      </nav>
+      <div class="a-topo__direita">
+        <a class="a-link" href="{{ url_for('index') }}" target="_blank" rel="noopener">Ver site</a>
+        <form method="post" action="{{ url_for('sair') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="a-btn a-btn--discreto" type="submit">Sair</button>
+        </form>
+      </div>
+    </div>
+  </header>
 
-<form class="a-busca" method="get" action="{{ url_for('clientes') }}">
-  <input type="search" name="q" value="{{ busca }}" placeholder="Buscar por empresa, contato ou CNPJ" aria-label="Buscar clientes">
-  <button class="a-btn" type="submit">Buscar</button>
-</form>
+  <main class="a-container a-principal">
+    {% with mensagens = get_flashed_messages(with_categories=true) %}
+      {% for categoria, texto in mensagens %}
+      <p class="a-aviso a-aviso--{{ 'erro' if categoria == 'erro' else 'ok' }}" role="{{ 'alert' if categoria == 'erro' else 'status' }}">{{ texto }}</p>
+      {% endfor %}
+    {% endwith %}
+    {% block conteudo %}{% endblock %}
+  </main>
 
-{% if lista %}
-<div class="a-tabela-wrap">
-  <table class="a-tabela">
-    <thead><tr><th>Empresa</th><th>Contato</th><th>Telefone</th><th>Pedidos</th><th>Total comprado</th><th></th></tr></thead>
-    <tbody>
-    {% for c in lista %}
-      <tr>
-        <td data-rotulo="Empresa"><a href="{{ url_for('cliente', cliente_id=c.id) }}"><strong>{{ c.empresa }}</strong></a>
-          {% if c.cnpj %}<br><small>{{ c.cnpj }}</small>{% endif %}</td>
-        <td data-rotulo="Contato">{{ c.contato or '—' }}</td>
-        <td data-rotulo="Telefone">{{ c.telefone or '—' }}</td>
-        <td data-rotulo="Pedidos">{{ c.pedidos }}</td>
-        <td data-rotulo="Total comprado">{{ c.total|brl }}</td>
-        <td><a href="{{ url_for('pedido', cliente=c.id) }}">Novo orçamento</a></td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
-</div>
-<p class="a-dica">“Pedidos” e “Total comprado” contam só o que já foi aprovado (não inclui orçamentos nem cancelados).</p>
-{% else %}
-<p class="a-vazio">{% if busca %}Nenhum cliente encontrado.{% else %}Nenhum cliente cadastrado ainda.{% endif %}</p>
-{% endif %}
-{% endblock %}
+  <footer class="a-container a-rodape">
+    <a href="{{ url_for('backup') }}">Baixar backup do banco de dados</a>
+    <span>Guarde o arquivo em local seguro: ele contém os dados dos clientes.</span>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/admin.js') }}" defer></script>
+</body>
+</html>
